@@ -55,21 +55,31 @@ function preconnectTo(url) {
 function setPosterWithFallback(videoEl, data) {
     const candidates = [data.cover, data.origin_cover, data.ai_dynamic_cover, data.dynamic_cover]
         .map(cleanMediaUrl).filter((u, i, all) => u && all.indexOf(u) === i);
+    if (!candidates.length) return;
+    preconnectTo(candidates[0]);
+    videoEl.poster = candidates[0];            // show the thumbnail immediately
     let i = 0;
-    (function tryNext() {
-        if (i >= candidates.length) return;
-        const url = candidates[i++];
+    (function check() {                        // if it fails to load, swap to the next cover
         const probe = new Image();
-        probe.onload = () => { videoEl.poster = url; };
-        probe.onerror = () => tryNext();
-        probe.src = url;
+        probe.onerror = () => {
+            i++;
+            if (i < candidates.length) { videoEl.poster = candidates[i]; check(); }
+        };
+        probe.src = candidates[i];
     })();
 }
 
 /* ============================================================
    FILE NAMING: "<title> - downloaded by tiktokvideodownload.app.ext"
 ============================================================ */
-const SITE_TAG = 'downloaded by tiktokvideodownload.app';
+const SITE_DOMAIN = 'tiktokvideodownload.app';
+
+function randomName() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let id = '';
+    for (let i = 0; i < 8; i++) id += chars[Math.floor(Math.random() * chars.length)];
+    return 'TikTok-' + id;
+}
 
 function makeFilename(ext, index) {
     let t = (S.caption || (S.currentData && S.currentData.title) || '');
@@ -80,9 +90,10 @@ function makeFilename(ext, index) {
         .trim()
         .slice(0, 80)
         .trim();
-    if (!t) t = 'TikTok video';
+    if (!t) t = S.randomName || (S.randomName = randomName());   // no title -> random name (same for every file of this video)
+    const label = ext === 'mp4' ? 'video downloaded by' : 'downloaded by';
     const num = index ? ` (${index})` : '';
-    return `${t} - ${SITE_TAG}${num}.${ext}`;
+    return `${t} - ${label} ${SITE_DOMAIN}${num}.${ext}`;
 }
 
 /* ============================================================
@@ -120,7 +131,7 @@ function playVideoFast(videoEl, videoWrap, candidates, onAllFailed) {
     setVideoLoadingHint(videoWrap, true);
     let i = 0;
     videoEl.preload = 'auto';
-    videoEl.onloadeddata = () => { setVideoLoadingHint(videoWrap, false); videoEl.onerror = null; };
+    videoEl.onloadeddata = () => { setVideoLoadingHint(videoWrap, false); videoEl.onerror = null; videoEl.play().catch(() => {}); };
     videoEl.onerror = () => {
         i++;
         if (i < candidates.length) { videoEl.src = candidates[i]; videoEl.load(); }
@@ -128,6 +139,27 @@ function playVideoFast(videoEl, videoWrap, candidates, onAllFailed) {
     };
     videoEl.src = candidates[0];
     videoEl.load();
+}
+
+/* Thumbnail first, full video only when the user taps play */
+function setupLazyPreview(videoEl, videoWrap, candidates, onAllFailed) {
+    const old = videoWrap.querySelector('.vw-play');
+    if (old) old.remove();
+    candidates.forEach(preconnectTo);
+    videoEl.controls = false;
+    videoEl.preload = 'none';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'vw-play';
+    btn.setAttribute('aria-label', 'Play video preview');
+    btn.innerHTML = '<span class="vw-play-ico"><i class="bi bi-play-fill"></i></span><span class="vw-play-txt">Tap to preview video</span>';
+    btn.addEventListener('click', () => {
+        btn.remove();
+        videoEl.controls = true;
+        playVideoFast(videoEl, videoWrap, candidates, onAllFailed);
+    });
+    if (getComputedStyle(videoWrap).position === 'static') videoWrap.style.position = 'relative';
+    videoWrap.appendChild(btn);
 }
 
 /* ============================================================
@@ -513,6 +545,9 @@ function processData(data, originalUrl) {
     placeholder.style.display = 'none';
     videoEl.onerror = null;
     videoEl.onloadeddata = null;
+    S.randomName = null;
+    const oldPlay = videoWrap.querySelector('.vw-play');
+    if (oldPlay) oldPlay.remove();
     setVideoLoadingHint(videoWrap, false);
     if (videoEl.dataset.blobUrl) { URL.revokeObjectURL(videoEl.dataset.blobUrl); delete videoEl.dataset.blobUrl; }
     videoEl.removeAttribute('poster');
@@ -534,10 +569,9 @@ function processData(data, originalUrl) {
         document.getElementById('btnMp4').style.display = 'flex';
         document.getElementById('btnAllImg').style.display = 'none';
 
-        playVideoFast(videoEl, videoWrap, previewCandidates, () => {
-            videoWrap.style.display = 'none';
-            placeholder.style.display = 'block';
+        setupLazyPreview(videoEl, videoWrap, previewCandidates, () => {
             showToast('Preview Unavailable', 'The preview could not load, but the Download button may still work.', 'error');
+            setupLazyPreview(videoEl, videoWrap, previewCandidates, () => {});   // let the user retry
         });
     } else {
         placeholder.style.display = 'block';
