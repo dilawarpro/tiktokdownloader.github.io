@@ -352,6 +352,24 @@ img { max-width:100%; }
     .tt-glow,.tt-svg,.tt-orb,.tt-arc,.tt-logo i,.tt-tips span,.progress-fill,.progress-fill::after { animation-duration:6s; }
 }
 
+/* Download progress card */
+#dlStack { position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:10px;width:min(380px,calc(100% - 24px)); }
+.dl-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:13px 15px;box-shadow:0 14px 40px rgba(0,0,0,0.3);opacity:0;transform:translateY(16px);transition:opacity 0.3s ease,transform 0.35s cubic-bezier(0.22,1,0.36,1); }
+.dl-card.show { opacity:1;transform:translateY(0); }
+.dl-card-top { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
+.dl-card-ico { color:var(--primary);font-size:1.25rem;display:flex; }
+.dl-card.done .dl-card-ico { color:var(--success); }
+.dl-card-name { flex:1;font-size:0.8rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.dl-card-x { background:none;border:0;color:var(--text-muted);cursor:pointer;font-size:0.85rem;padding:2px 4px; }
+.dl-card-x:hover { color:var(--secondary); }
+.dl-card-bar { height:6px;background:var(--border-light);border-radius:6px;overflow:hidden;position:relative; }
+.dl-card-bar span { display:block;height:100%;width:0%;border-radius:6px;background:linear-gradient(90deg,#00D4FF,#6C3EF4,#FF2D78);transition:width 0.25s ease-out; }
+.dl-card.done .dl-card-bar span { background:var(--success); }
+.dl-card-bar.indeterminate span { width:40% !important;animation:dl-slide 1.2s ease-in-out infinite; }
+@keyframes dl-slide { 0%{transform:translateX(-100%);} 100%{transform:translateX(250%);} }
+.dl-card-txt { margin-top:7px;font-size:0.72rem;color:var(--text-muted);font-weight:600; }
+@media(max-width:767px){ #dlStack{ bottom:84px; } }
+
 /* Tap-to-play overlay on the instant thumbnail */
 .vw-play { position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:0;background:linear-gradient(to top,rgba(10,10,20,0.55),rgba(10,10,20,0.1));color:#fff;cursor:pointer;font-family:var(--font); }
 .vw-play-ico { width:68px;height:68px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:0 10px 30px rgba(108,62,244,0.55);transition:var(--transition); }

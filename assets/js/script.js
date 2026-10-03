@@ -538,6 +538,7 @@ function processData(data, originalUrl) {
     const vCandidates = videoCandidates(data);
     const previewCandidates = previewVideoCandidates(data);
     S.videoUrl = vCandidates[0] || null;
+    S.videoList = vCandidates;   // HD first, then standard — used as automatic fallbacks
     S.audioUrl = cleanMediaUrl(data.music || (data.music_info && data.music_info.play) || null);
     S.currentData = data;
     S.copyCount = 0;
@@ -702,38 +703,134 @@ function setLoading(on) {
 /* ============================================================
    DOWNLOAD
 ============================================================ */
-function doDownload(url, filename) {
-    if (!url) { showToast('No URL', 'Download URL not available.', 'error'); return; }
-    showToast('Starting...', 'Preparing your download', 'info');
-    const isImage = /\.(?:jpe?g|png|webp|gif|avif)(?:[?#]|$)/i.test(url) || /\.(?:jpe?g|png|webp|gif|avif)$/i.test(filename);
-    const downloadSources = isImage
-        ? [imagePreviewUrl(url), `https://images.weserv.nl/?url=${encodeURIComponent(url)}`, url]
-        : [url];
-    const downloadRequest = downloadSources.reduce(
-        (request, source) => request.catch(() => fetch(source, { mode: 'cors' })),
-        Promise.reject()
-    );
-    downloadRequest
-        .then(r => { if (!r.ok) throw new Error(); return r.blob(); })
-        .then(blob => {
-            const bUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = bUrl; a.download = filename;
-            document.body.appendChild(a); a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(bUrl), 5000);
-            showToast('Downloaded!', 'File saved successfully.', 'success');
-        })
-        .catch(() => {
-            // Browser blocked a direct save: open the file so the user can still save it
-            window.open(url, '_blank', 'noopener');
-            showToast('Opened in new tab', 'Long-press or right-click the file to save it.', 'info');
-        });
+/* Streams the file with live progress, so the user always sees it moving.
+   If a source stalls (no data for 10s) it automatically switches to the next one. */
+function saveBlob(blob, filename) {
+    const bUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = bUrl; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(bUrl), 10000);
+}
+
+function fmtMB(b) { return (b / 1048576).toFixed(b >= 10485760 ? 0 : 1) + ' MB'; }
+
+function openDlCard(filename, immediate) {
+    let box = document.getElementById('dlStack');
+    if (!box) { box = document.createElement('div'); box.id = 'dlStack'; document.body.appendChild(box); }
+    const ui = { el: null, cancelled: false, ctrl: null, closed: false, got: 0, total: 0 };
+    const short = filename.length > 46 ? filename.slice(0, 43) + '…' : filename;
+
+    function build() {
+        if (ui.el || ui.closed) return;
+        ui.el = document.createElement('div');
+        ui.el.className = 'dl-card';
+        ui.el.innerHTML = `
+            <div class="dl-card-top">
+                <span class="dl-card-ico"><i class="bi bi-arrow-down-circle-fill"></i></span>
+                <span class="dl-card-name">${escHtml(short)}</span>
+                <button type="button" class="dl-card-x" aria-label="Cancel download"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="dl-card-bar"><span></span></div>
+            <div class="dl-card-txt">Starting download…</div>`;
+        ui.el.querySelector('.dl-card-x').onclick = () => { ui.cancelled = true; if (ui.ctrl) ui.ctrl.abort(); ui.close(); };
+        box.appendChild(ui.el);
+        requestAnimationFrame(() => ui.el && ui.el.classList.add('show'));
+        ui.render();
+    }
+    ui.render = () => {
+        if (!ui.el) return;
+        const bar = ui.el.querySelector('.dl-card-bar span');
+        const txt = ui.el.querySelector('.dl-card-txt');
+        if (ui.total) {
+            const p = Math.min(99, Math.round(ui.got / ui.total * 100));
+            ui.el.querySelector('.dl-card-bar').classList.remove('indeterminate');
+            bar.style.width = p + '%';
+            txt.textContent = `${p}% · ${fmtMB(ui.got)} of ${fmtMB(ui.total)}`;
+        } else if (ui.got) {
+            ui.el.querySelector('.dl-card-bar').classList.add('indeterminate');
+            txt.textContent = `Downloading… ${fmtMB(ui.got)}`;
+        }
+    };
+    ui.update = (got, total) => { ui.got = got; ui.total = total; ui.render(); };
+    ui.note = msg => { if (ui.el) { ui.got = 0; ui.total = 0; ui.el.querySelector('.dl-card-txt').textContent = msg; ui.el.querySelector('.dl-card-bar span').style.width = '0%'; } };
+    ui.done = () => {
+        if (!ui.el) { ui.closed = true; return; }
+        ui.el.classList.add('done');
+        ui.el.querySelector('.dl-card-bar span').style.width = '100%';
+        ui.el.querySelector('.dl-card-bar').classList.remove('indeterminate');
+        ui.el.querySelector('.dl-card-txt').textContent = 'Saved ✓';
+        setTimeout(ui.close, 1800);
+    };
+    ui.close = () => {
+        ui.closed = true;
+        if (ui.timer) clearTimeout(ui.timer);
+        if (!ui.el) return;
+        ui.el.classList.remove('show');
+        const el = ui.el; ui.el = null;
+        setTimeout(() => el.remove(), 350);
+    };
+    if (immediate) build(); else ui.timer = setTimeout(build, 700);
+    return ui;
+}
+
+async function fetchBlobProgress(url, ui, stallMs) {
+    const ctrl = new AbortController();
+    ui.ctrl = ctrl;
+    let stall = setTimeout(() => ctrl.abort(), stallMs);
+    const bump = () => { clearTimeout(stall); stall = setTimeout(() => ctrl.abort(), stallMs); };
+    try {
+        const res = await fetch(url, { mode: 'cors', signal: ctrl.signal });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const total = parseInt(res.headers.get('content-length') || '0', 10) || 0;
+        if (!res.body || !res.body.getReader) return await res.blob();
+        const reader = res.body.getReader();
+        const chunks = [];
+        let got = 0;
+        for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value); got += value.length;
+            bump(); ui.update(got, total);
+        }
+        return new Blob(chunks, { type: res.headers.get('content-type') || 'application/octet-stream' });
+    } finally {
+        clearTimeout(stall);
+    }
+}
+
+async function doDownload(urlOrList, filename) {
+    const urls = (Array.isArray(urlOrList) ? urlOrList : [urlOrList]).filter(Boolean);
+    if (!urls.length) { showToast('No URL', 'Download URL not available.', 'error'); return; }
+    const isImage = /\.(?:jpe?g|png|webp|gif|avif)$/i.test(filename);
+    const sources = isImage
+        ? urls.flatMap(u => [imagePreviewUrl(u), `https://images.weserv.nl/?url=${encodeURIComponent(u)}`, u])
+        : urls;
+    const ui = openDlCard(filename, !isImage);
+
+    for (let i = 0; i < sources.length; i++) {
+        try {
+            const blob = await fetchBlobProgress(sources[i], ui, 10000);
+            if (!blob || blob.size < 1000) throw new Error('empty');
+            saveBlob(blob, filename);
+            ui.done();
+            if (isImage) showToast('Downloaded!', 'Image saved.', 'success');
+            return;
+        } catch (err) {
+            if (ui.cancelled) return;
+            if (i < sources.length - 1) ui.note('Slow server, switching to a faster one…');
+        }
+    }
+    // every source failed or was blocked: let the browser handle it directly
+    ui.close();
+    window.open(urls[0], '_blank', 'noopener');
+    showToast('Opened in new tab', 'Long-press or right-click the file to save it.', 'info');
 }
 
 function doMp4() {
     if (!S.videoUrl) { showToast('No Video', 'Fetch a TikTok URL first.', 'error'); return; }
-    doDownload(S.videoUrl, makeFilename('mp4'));
+    doDownload(S.videoList && S.videoList.length ? S.videoList : S.videoUrl, makeFilename('mp4'));
 }
 function doMp3() {
     if (!S.audioUrl) { showToast('No Audio', 'No audio track found.', 'error'); return; }
