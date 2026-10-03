@@ -99,15 +99,34 @@ function makeFilename(ext, index) {
 /* ============================================================
    LOADERS
 ============================================================ */
-function loaderMarkup() {
+let _ttLoaderId = 0;
+function loaderMarkup(compact) {
+    const id = 'ttGrad' + (++_ttLoaderId);   // unique gradient id per loader instance
     return `
-    <div class="tt-loader" aria-hidden="true">
-        <div class="tt-orbit">
-            <span class="tt-ring tt-r1"></span>
-            <span class="tt-ring tt-r2"></span>
-            <span class="tt-core"><i class="bi bi-tiktok"></i></span>
+    <div class="tt-loader${compact ? ' sm' : ''}" aria-hidden="true">
+        <div class="tt-stage">
+            <span class="tt-glow"></span>
+            <span class="tt-orb"><i></i><i></i></span>
+            <svg class="tt-svg" viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#00D4FF"/>
+                        <stop offset="50%" stop-color="#6C3EF4"/>
+                        <stop offset="100%" stop-color="#FF2D78"/>
+                    </linearGradient>
+                </defs>
+                <circle class="tt-track-c" cx="50" cy="50" r="44"/>
+                <circle class="tt-arc" cx="50" cy="50" r="44" stroke="url(#${id})"/>
+            </svg>
+            <span class="tt-logo">
+                <i class="bi bi-tiktok c1"></i><i class="bi bi-tiktok c2"></i><i class="bi bi-tiktok c3"></i>
+            </span>
         </div>
-        <div class="tt-eq"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="tt-tips">
+            <span>Finding your video…</span>
+            <span>Removing the watermark…</span>
+            <span>Grabbing audio &amp; caption…</span>
+        </div>
     </div>`;
 }
 
@@ -116,7 +135,7 @@ function setVideoLoadingHint(videoWrap, show) {
     if (show && !hint) {
         hint = document.createElement('div');
         hint.className = 'vw-loading-hint';
-        hint.innerHTML = loaderMarkup() + '<span>Loading preview…</span>';
+        hint.innerHTML = loaderMarkup(true) + '<span>Loading preview…</span>';
         if (getComputedStyle(videoWrap).position === 'static') videoWrap.style.position = 'relative';
         videoWrap.appendChild(hint);
     } else if (!show && hint) {
