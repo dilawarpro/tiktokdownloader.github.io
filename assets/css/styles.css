@@ -368,6 +368,8 @@ img { max-width:100%; }
 .dl-card-bar.indeterminate span { width:40% !important;animation:dl-slide 1.2s ease-in-out infinite; }
 @keyframes dl-slide { 0%{transform:translateX(-100%);} 100%{transform:translateX(250%);} }
 .dl-card-txt { margin-top:7px;font-size:0.72rem;color:var(--text-muted);font-weight:600; }
+.dl-card-open { display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;padding:9px 12px;border:0;border-radius:var(--radius-sm);background:var(--gradient-btn);color:#fff;font:700 0.8rem var(--font);cursor:pointer; }
+.dl-card-txt b { color:var(--text); }
 @media(max-width:767px){ #dlStack{ bottom:84px; } }
 
 /* Tap-to-play overlay on the instant thumbnail */

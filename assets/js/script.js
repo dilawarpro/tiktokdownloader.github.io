@@ -539,7 +539,10 @@ function processData(data, originalUrl) {
     const previewCandidates = previewVideoCandidates(data);
     S.videoUrl = vCandidates[0] || null;
     S.videoList = vCandidates;   // HD first, then standard — used as automatic fallbacks
-    S.audioUrl = cleanMediaUrl(data.music || (data.music_info && data.music_info.play) || null);
+    const mi = data.music_info || {};
+    S.audioList = [data.music, mi.play, mi.play_url, mi.url]
+        .map(cleanMediaUrl).filter((u, i, all) => u && all.indexOf(u) === i);   // tried in order until one works
+    S.audioUrl = S.audioList[0] || null;
     S.currentData = data;
     S.copyCount = 0;
 
@@ -706,6 +709,8 @@ function setLoading(on) {
 /* Streams the file with live progress, so the user always sees it moving.
    If a source stalls (no data for 10s) it automatically switches to the next one. */
 function saveBlob(blob, filename) {
+    if (/\.mp3$/i.test(filename) && !/^audio\//i.test(blob.type)) blob = new Blob([blob], { type: 'audio/mpeg' });
+    if (/\.mp4$/i.test(filename) && !/^video\//i.test(blob.type)) blob = new Blob([blob], { type: 'video/mp4' });
     const bUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = bUrl; a.download = filename;
@@ -771,18 +776,32 @@ function openDlCard(filename, immediate) {
         const el = ui.el; ui.el = null;
         setTimeout(() => el.remove(), 350);
     };
+    ui.show = build;
+    ui.manual = (url, label) => {
+        build();
+        if (!ui.el) return;
+        ui.el.querySelector('.dl-card-bar').style.display = 'none';
+        ui.el.querySelector('.dl-card-txt').innerHTML =
+            'Your browser blocked the direct save. Tap below, then use <b>Save / Download</b> in the new tab.' +
+            '<button type="button" class="dl-card-open"><i class="bi bi-box-arrow-up-right"></i> ' + label + '</button>';
+        ui.el.querySelector('.dl-card-open').onclick = () => { window.open(url, '_blank', 'noopener'); ui.close(); };
+        setTimeout(ui.close, 25000);
+    };
     if (immediate) build(); else ui.timer = setTimeout(build, 700);
     return ui;
 }
 
-async function fetchBlobProgress(url, ui, stallMs) {
+async function fetchBlobProgress(url, ui, stallMs, firstByteMs) {
     const ctrl = new AbortController();
     ui.ctrl = ctrl;
-    let stall = setTimeout(() => ctrl.abort(), stallMs);
+    let stall = setTimeout(() => ctrl.abort(), firstByteMs || stallMs);   // TikTok can take a while to prepare the file
     const bump = () => { clearTimeout(stall); stall = setTimeout(() => ctrl.abort(), stallMs); };
     try {
-        const res = await fetch(url, { mode: 'cors', signal: ctrl.signal });
+        const res = await fetch(url, { mode: 'cors', signal: ctrl.signal, referrerPolicy: 'no-referrer', credentials: 'omit' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
+        const ct = res.headers.get('content-type') || '';
+        if (/^text\/|json/i.test(ct)) throw new Error('Not a media file (' + ct + ')');   // error page instead of the file
+        bump();
         const total = parseInt(res.headers.get('content-length') || '0', 10) || 0;
         if (!res.body || !res.body.getReader) return await res.blob();
         const reader = res.body.getReader();
@@ -794,7 +813,7 @@ async function fetchBlobProgress(url, ui, stallMs) {
             chunks.push(value); got += value.length;
             bump(); ui.update(got, total);
         }
-        return new Blob(chunks, { type: res.headers.get('content-type') || 'application/octet-stream' });
+        return new Blob(chunks, { type: ct || 'application/octet-stream' });
     } finally {
         clearTimeout(stall);
     }
@@ -811,7 +830,7 @@ async function doDownload(urlOrList, filename) {
 
     for (let i = 0; i < sources.length; i++) {
         try {
-            const blob = await fetchBlobProgress(sources[i], ui, 10000);
+            const blob = await fetchBlobProgress(sources[i], ui, 10000, 25000);
             if (!blob || blob.size < 1000) throw new Error('empty');
             saveBlob(blob, filename);
             ui.done();
@@ -819,13 +838,12 @@ async function doDownload(urlOrList, filename) {
             return;
         } catch (err) {
             if (ui.cancelled) return;
-            if (i < sources.length - 1) ui.note('Slow server, switching to a faster one…');
+            console.warn('[TikTok Downloader] Source failed:', sources[i], err && err.message);
+            if (i < sources.length - 1) ui.note('Trying another server…');
         }
     }
     // every source failed or was blocked: let the browser handle it directly
-    ui.close();
-    window.open(urls[0], '_blank', 'noopener');
-    showToast('Opened in new tab', 'Long-press or right-click the file to save it.', 'info');
+    ui.manual(urls[0], /\.mp3$/i.test(filename) ? 'Open MP3' : 'Open file');
 }
 
 function doMp4() {
@@ -834,7 +852,7 @@ function doMp4() {
 }
 function doMp3() {
     if (!S.audioUrl) { showToast('No Audio', 'No audio track found.', 'error'); return; }
-    doDownload(S.audioUrl, makeFilename('mp3'));
+    doDownload(S.audioList && S.audioList.length ? S.audioList : S.audioUrl, makeFilename('mp3'));
 }
 function downloadAllSlides() {
     if (!S.images.length) { showToast('No Images', 'No slideshow images found.', 'error'); return; }
