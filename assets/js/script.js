@@ -30,14 +30,27 @@ function resolveTikwmUrl(u) {
 }
 function forceHttps(u) { return u ? u.replace(/^http:\/\//i, 'https://') : u; }
 function cleanMediaUrl(u) { return forceHttps(resolveTikwmUrl(u)); }
+function coerceMediaUrl(value) {
+    if (!value) return null;
+    if (typeof value === 'string') return cleanMediaUrl(value);
+    if (typeof value === 'object') {
+        const candidates = [value.url, value.src, value.play, value.play_url, value.download_url, value.link, value.href];
+        for (const candidate of candidates) {
+            const result = coerceMediaUrl(candidate);
+            if (result) return result;
+        }
+        return null;
+    }
+    return null;
+}
 
 /* HD first — used by the Download button */
 function videoCandidates(data) {
-    return [data.hdplay, data.play, data.wmplay].map(cleanMediaUrl).filter((u, i, all) => u && all.indexOf(u) === i);
+    return [data.hdplay, data.play, data.wmplay].map(coerceMediaUrl).filter((u, i, all) => u && all.indexOf(u) === i);
 }
 /* Smallest first — used by the on-page preview so playback starts sooner */
 function previewVideoCandidates(data) {
-    return [data.play, data.wmplay, data.hdplay].map(cleanMediaUrl).filter((u, i, all) => u && all.indexOf(u) === i);
+    return [data.play, data.wmplay, data.hdplay].map(coerceMediaUrl).filter((u, i, all) => u && all.indexOf(u) === i);
 }
 
 function preconnectTo(url) {
@@ -487,14 +500,13 @@ async function fetchTikwm(url, signal) {
 }
 
 async function fetchTikmate(url, signal) {
-    await new Promise(r => setTimeout(r, 1500));   // only used if the primary is slow
     if (signal.aborted) throw new Error('aborted');
     const r = await fetch(`https://api.tikmate.app/api/lookup?url=${encodeURIComponent(url)}`, { signal });
     const j = await r.json();
     if (!(j && j.id)) throw new Error('Backup failed');
     return {
         play: `https://tikmate.app/download/${j.token}/${j.id}.mp4`,
-        music: j.musicUrl || null,
+        music: j.musicUrl || j.music || j.music_url || null,
         title: j.desc || '',
         author: { nickname: j.author || 'TikTok User' },
         duration: j.duration || 0,
@@ -514,12 +526,18 @@ async function fetchTikTok() {
 
     const ctrl = new AbortController();
     clearTimeout(S.fetchTimer);
-    S.fetchTimer = setTimeout(() => ctrl.abort(), 15000);
+    S.fetchTimer = setTimeout(() => ctrl.abort(), 9000);
 
     try {
-        const data = await Promise.any([fetchTikwm(url, ctrl.signal), fetchTikmate(url, ctrl.signal)]);
+        let data;
+        try {
+            data = await fetchTikwm(url, ctrl.signal);
+        } catch (primaryErr) {
+            if (ctrl.signal.aborted) throw primaryErr;
+            data = await fetchTikmate(url, ctrl.signal);
+        }
         clearTimeout(S.fetchTimer);
-        ctrl.abort();   // cancel whichever request lost the race
+        ctrl.abort();
         API_CACHE.set(url, { data, t: Date.now() });
         processData(data, url);
     } catch (err) {
@@ -540,8 +558,11 @@ function processData(data, originalUrl) {
     S.videoUrl = vCandidates[0] || null;
     S.videoList = vCandidates;   // HD first, then standard — used as automatic fallbacks
     const mi = data.music_info || {};
-    S.audioList = [data.music, mi.play, mi.play_url, mi.url]
-        .map(cleanMediaUrl).filter((u, i, all) => u && all.indexOf(u) === i);   // tried in order until one works
+    const audioSources = [data.music, mi, data.music_info, data.audio, data.audio_url, data.music_url,
+        mi.play, mi.play_url, mi.url, mi.link, mi.href];
+    S.audioList = audioSources
+        .map(coerceMediaUrl)
+        .filter((u, i, all) => u && all.indexOf(u) === i);
     S.audioUrl = S.audioList[0] || null;
     S.currentData = data;
     S.copyCount = 0;
@@ -782,10 +803,21 @@ function openDlCard(filename, immediate) {
         if (!ui.el) return;
         ui.el.querySelector('.dl-card-bar').style.display = 'none';
         ui.el.querySelector('.dl-card-txt').innerHTML =
-            'Your browser blocked the direct save. Tap below, then use <b>Save / Download</b> in the new tab.' +
-            '<button type="button" class="dl-card-open"><i class="bi bi-box-arrow-up-right"></i> ' + label + '</button>';
-        ui.el.querySelector('.dl-card-open').onclick = () => { window.open(url, '_blank', 'noopener'); ui.close(); };
-        setTimeout(ui.close, 25000);
+            'The browser blocked a direct save from this source. Trying a direct browser download instead.' +
+            '<button type="button" class="dl-card-open"><i class="bi bi-download"></i> ' + label + '</button>';
+        ui.el.querySelector('.dl-card-open').onclick = () => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.rel = 'noopener';
+            a.target = '_blank';
+            a.download = label || 'download';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            ui.close();
+        };
+        setTimeout(() => ui.el && ui.el.querySelector('.dl-card-open').click(), 150);
+        setTimeout(ui.close, 12000);
     };
     if (immediate) build(); else ui.timer = setTimeout(build, 700);
     return ui;
