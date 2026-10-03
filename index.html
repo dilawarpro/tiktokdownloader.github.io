@@ -519,6 +519,22 @@
             <h2 class="section-title" id="story-h2">Why We Built the Best <span class="text-gradient">TikTok Caption Downloader</span></h2>
             <p class="section-desc">A real story from a TikTok lover that inspired this tool.</p>
         </div>
+        <script>
+            const avatar = document.querySelector('.story-avatar');
+if (avatar) {
+  // Clear the emoji (text node)
+  avatar.textContent = '';
+
+  // Set the background image and cover styles
+  await setElementStyles(avatar, {
+    'background-image': 'url("https://mentorship.dilawarpro.com/trainer.jpg")',
+    'background-size': 'cover',
+    'background-position': 'center',
+    'background-repeat': 'no-repeat',
+    'border': '2px solid #ddd' // Adding a slight border for visibility
+  });
+}
+        </script>
         <div class="row g-4 align-items-start">
             <div class="col-lg-8">
                 <div class="story-card">
