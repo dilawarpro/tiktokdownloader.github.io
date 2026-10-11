@@ -277,14 +277,14 @@ img { max-width:100%; }
 /* soft breathing glow */
 .tt-glow { position:absolute;inset:-16px;border-radius:50%;
     background:radial-gradient(circle,rgba(108,62,244,0.42),rgba(255,45,120,0.22) 52%,transparent 72%);
-    filter:blur(8px);animation:tt-breathe 1.5s ease-in-out infinite;will-change:transform,opacity; }
+    filter:blur(8px);animation:tt-breathe 1.2s ease-in-out infinite;will-change:transform,opacity; }
 @keyframes tt-breathe { 0%,100%{transform:scale(0.9);opacity:0.65;} 50%{transform:scale(1.12);opacity:1;} }
 
 /* flowing gradient arc */
-.tt-svg { position:absolute;inset:0;width:100%;height:100%;animation:tt-rot 1.15s linear infinite;will-change:transform; }
+.tt-svg { position:absolute;inset:0;width:100%;height:100%;animation:tt-rot 0.9s linear infinite;will-change:transform; }
 .tt-svg circle { fill:none;stroke-width:3.5;stroke-linecap:round; }
 .tt-track-c { stroke:var(--border-light); }
-.tt-arc { stroke-dasharray:18 258;animation:tt-dash 1.15s cubic-bezier(0.45,0,0.55,1) infinite; }
+.tt-arc { stroke-dasharray:18 258;animation:tt-dash 0.9s cubic-bezier(0.45,0,0.55,1) infinite; }
 @keyframes tt-rot { to { transform:rotate(360deg); } }
 @keyframes tt-dash {
     0%   { stroke-dasharray:18 258;  stroke-dashoffset:0; }
@@ -293,7 +293,7 @@ img { max-width:100%; }
 }
 
 /* two dots orbiting the opposite way */
-.tt-orb { position:absolute;inset:-9px;animation:tt-rot 1.8s linear infinite reverse;will-change:transform; }
+.tt-orb { position:absolute;inset:-9px;animation:tt-rot 1.4s linear infinite reverse;will-change:transform; }
 .tt-orb i { position:absolute;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%; }
 .tt-orb i:first-child { top:0;background:#00D4FF;box-shadow:0 0 10px #00D4FF; }
 .tt-orb i:last-child { bottom:0;background:#FF2D78;box-shadow:0 0 10px #FF2D78; }
@@ -301,9 +301,9 @@ img { max-width:100%; }
 /* TikTok-style chromatic logo */
 .tt-logo { position:relative;width:38px;height:38px;font-size:2rem;line-height:38px;text-align:center; }
 .tt-logo i { position:absolute;inset:0;display:block; }
-.tt-logo .c1 { color:#00D4FF;animation:tt-drift-a 1.2s ease-in-out infinite;mix-blend-mode:screen; }
-.tt-logo .c2 { color:#FF2D78;animation:tt-drift-b 1.2s ease-in-out infinite;mix-blend-mode:screen; }
-.tt-logo .c3 { color:var(--text);animation:tt-pop 1.2s ease-in-out infinite; }
+.tt-logo .c1 { color:#00D4FF;animation:tt-drift-a 0.95s ease-in-out infinite;mix-blend-mode:screen; }
+.tt-logo .c2 { color:#FF2D78;animation:tt-drift-b 0.95s ease-in-out infinite;mix-blend-mode:screen; }
+.tt-logo .c3 { color:var(--text);animation:tt-pop 0.95s ease-in-out infinite; }
 [data-theme="light"] .tt-logo .c1, [data-theme="light"] .tt-logo .c2 { mix-blend-mode:multiply; }
 @keyframes tt-drift-a { 0%,100%{transform:translate(-2.5px,-1px);} 50%{transform:translate(0.5px,0);} }
 @keyframes tt-drift-b { 0%,100%{transform:translate(2.5px,1px);}  50%{transform:translate(-0.5px,0);} }
@@ -311,9 +311,9 @@ img { max-width:100%; }
 
 /* rotating status messages (pure CSS crossfade) */
 .tt-tips { position:relative;height:1.3em;width:100%;text-align:center;font-size:0.82rem;font-weight:600;color:var(--text-muted); }
-.tt-tips span { position:absolute;left:0;right:0;opacity:0;animation:tt-tip 4.2s ease-in-out infinite;will-change:transform,opacity; }
-.tt-tips span:nth-child(2) { animation-delay:1.4s; }
-.tt-tips span:nth-child(3) { animation-delay:2.8s; }
+.tt-tips span { position:absolute;left:0;right:0;opacity:0;animation:tt-tip 3.6s ease-in-out infinite;will-change:transform,opacity; }
+.tt-tips span:nth-child(2) { animation-delay:1.2s; }
+.tt-tips span:nth-child(3) { animation-delay:2.4s; }
 @keyframes tt-tip {
     0%   { opacity:0;transform:translateY(7px); }
     7%   { opacity:1;transform:translateY(0); }
@@ -332,9 +332,9 @@ img { max-width:100%; }
 .progress-track { height:6px;border-radius:6px; }
 .progress-fill { position:relative;height:100%;border-radius:6px;width:0%;
     background:linear-gradient(90deg,#00D4FF,#6C3EF4,#FF2D78);background-size:200% 100%;
-    animation:tt-flow 2.2s linear infinite;transition:width 0.35s cubic-bezier(0.22,1,0.36,1);
+    animation:tt-flow 1.5s linear infinite;transition:width 0.25s cubic-bezier(0.22,1,0.36,1);
     box-shadow:0 0 12px rgba(108,62,244,0.55); }
-.progress-fill::after { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);transform:translateX(-100%);animation:tt-shimmer 1.4s ease-in-out infinite; }
+.progress-fill::after { content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);transform:translateX(-100%);animation:tt-shimmer 1s ease-in-out infinite; }
 @keyframes tt-flow { to { background-position:-200% 0; } }
 @keyframes tt-shimmer { to { transform:translateX(100%); } }
 

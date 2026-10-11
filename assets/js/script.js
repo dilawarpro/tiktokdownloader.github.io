@@ -449,7 +449,7 @@ function countUp(el) {
 }
 
 /* ============================================================
-   PROGRESS (eases toward 92% until data arrives)
+    PROGRESS (quickly reaches a waiting state until data arrives)
 ============================================================ */
 function startProgress() {
     const sec = document.getElementById('progressSection');
@@ -461,7 +461,7 @@ function startProgress() {
     let p = 0;
     clearInterval(S.progressTimer);
     S.progressTimer = setInterval(() => {
-        p += (92 - p) * 0.07;
+        p += (84 - p) * 0.14;
         fill.style.width = p.toFixed(1) + '%';
         pct.textContent = Math.round(p) + '%';
         lbl.textContent = p < 25 ? 'Connecting to servers...'
@@ -514,6 +514,41 @@ async function fetchTikmate(url, signal) {
     };
 }
 
+async function fetchTikTokFast(url, signal) {
+    const primaryCtrl = new AbortController();
+    const backupCtrl = new AbortController();
+    let backupTimer;
+    let rejectDelayed;
+    let backupPromise;
+    const startBackup = () => {
+        if (!backupPromise) backupPromise = fetchTikmate(url, backupCtrl.signal);
+        return backupPromise;
+    };
+    const abortRequests = () => {
+        primaryCtrl.abort();
+        backupCtrl.abort();
+        clearTimeout(backupTimer);
+        if (rejectDelayed) rejectDelayed(new Error('aborted'));
+    };
+    const delayedBackup = new Promise((resolve, reject) => {
+        rejectDelayed = reject;
+        backupTimer = setTimeout(() => startBackup().then(resolve, reject), 500);
+    });
+    const primary = fetchTikwm(url, primaryCtrl.signal).catch(error => {
+        if (signal.aborted) throw error;
+        return startBackup();
+    });
+
+    signal.addEventListener('abort', abortRequests, { once: true });
+    if (signal.aborted) abortRequests();
+    try {
+        return await Promise.any([primary, delayedBackup]);
+    } finally {
+        signal.removeEventListener('abort', abortRequests);
+        abortRequests();
+    }
+}
+
 async function fetchTikTok() {
     const url = document.getElementById('tiktokUrl').value.trim();
     if (!url) { showToast('URL Required', 'Paste a TikTok video URL first.', 'error'); document.getElementById('tiktokUrl').focus(); return; }
@@ -529,15 +564,8 @@ async function fetchTikTok() {
     S.fetchTimer = setTimeout(() => ctrl.abort(), 9000);
 
     try {
-        let data;
-        try {
-            data = await fetchTikwm(url, ctrl.signal);
-        } catch (primaryErr) {
-            if (ctrl.signal.aborted) throw primaryErr;
-            data = await fetchTikmate(url, ctrl.signal);
-        }
+        const data = await fetchTikTokFast(url, ctrl.signal);
         clearTimeout(S.fetchTimer);
-        ctrl.abort();
         API_CACHE.set(url, { data, t: Date.now() });
         processData(data, url);
     } catch (err) {
