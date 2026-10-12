@@ -140,8 +140,8 @@
             <span class="text-gradient">Contact Us</span>
         </h1>
         <p class="page-subtitle">
-            Have a question, found a bug, or want to suggest a feature?
-            We'd love to hear from you. We typically respond within 24-48 hours.
+            Have a question, found a bug, or want to suggest a feature? Use the contact options on
+            <a href="https://dilawarpro.com" target="_blank" rel="noopener">Dilawar Pro</a>.
         </p>
     </div>
 </section>
@@ -155,7 +155,7 @@
             <div class="col-lg-7">
                 <div class="contact-card">
                     <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:6px;">Send Us a Message</h2>
-                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:28px;">Fill out the form below and we'll get back to you as soon as possible.</p>
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:28px;">This form is not connected to a message-delivery service yet. Use the contact options on <a href="https://dilawarpro.com" target="_blank" rel="noopener" style="color:var(--primary);font-weight:700;">Dilawar Pro</a> instead.</p>
 
                     <form id="contactForm" novalidate>
                         <div class="row g-3">
@@ -212,7 +212,7 @@
                         <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:20px;">
                             <input type="checkbox" id="agree" style="margin-top:3px;accent-color:var(--primary);width:16px;height:16px;flex-shrink:0;">
                             <label for="agree" style="font-size:0.82rem;color:var(--text-muted);cursor:pointer;">
-                                I agree to the <a href="/privacy-policy" style="color:var(--primary);font-weight:600;">Privacy Policy</a>
+                                I agree to the <a href="./privacy-policy.html" style="color:var(--primary);font-weight:600;">Privacy Policy</a>
                                 and understand my message will be used to respond to my inquiry.
                             </label>
                         </div>
@@ -222,12 +222,6 @@
                         </button>
                     </form>
 
-                    <!-- Success -->
-                    <div class="success-banner" id="successBanner">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <h4 style="font-weight:800;margin-bottom:6px;">Message Sent! 🎉</h4>
-                        <p>Thank you for reaching out. We'll get back to you within 24-48 hours. In the meantime, feel free to <a href="https://tiktokvideodownload.app/" style="color:var(--primary);font-weight:700;">use our tool</a>!</p>
-                    </div>
                 </div>
             </div>
 
@@ -395,12 +389,7 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending...';
 
-        // Simulate form submission
-        setTimeout(() => {
-            document.getElementById('contactForm').style.display = 'none';
-            document.getElementById('successBanner').style.display = 'block';
-            showToast('Message Sent! 🎉', 'We\'ll reply within 24-48 hours.', 'success');
-        }, 1500);
+        showToast('Message not sent', 'Use the Dilawar Pro contact options; this form is not connected.', 'error');
     });
 
     function showToast(title, sub, type='success') {

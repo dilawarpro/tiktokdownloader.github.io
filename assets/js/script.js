@@ -46,7 +46,7 @@ function coerceMediaUrl(value) {
 
 /* HD first — used by the Download button */
 function videoCandidates(data) {
-    return [data.hdplay, data.play, data.wmplay].map(coerceMediaUrl).filter((u, i, all) => u && all.indexOf(u) === i);
+    return [data.hdplay, data.play].map(coerceMediaUrl).filter((u, i, all) => u && all.indexOf(u) === i);
 }
 /* Smallest first — used by the on-page preview so playback starts sooner */
 function previewVideoCandidates(data) {
@@ -638,7 +638,7 @@ function processData(data, originalUrl) {
         document.getElementById('contentBadge').textContent = '🎬 HD Video';
         setPosterWithFallback(videoEl, data);
         videoWrap.style.display = 'block';
-        document.getElementById('btnMp4').style.display = 'flex';
+        document.getElementById('btnMp4').style.display = S.videoUrl ? 'flex' : 'none';
         document.getElementById('btnAllImg').style.display = 'none';
 
         setupLazyPreview(videoEl, videoWrap, previewCandidates, () => {
@@ -674,7 +674,7 @@ function buildSlides(images) {
     preview.className = 'gallery-preview';
     preview.setAttribute('aria-label', `Open TikTok slideshow with ${images.length} photos`);
     const previewImage = document.createElement('img');
-    previewImage.alt = 'TikTok slideshow preview';
+    previewImage.alt = `TikTok slideshow image 1 of ${images.length}`;
     previewImage.loading = 'eager';
     previewImage.decoding = 'async';
     previewImage.referrerPolicy = 'no-referrer';
@@ -686,6 +686,7 @@ function buildSlides(images) {
     const currentDownload = document.getElementById('downloadCurrentImage');
     const updatePreview = index => {
         currentIndex = (index + images.length) % images.length;
+        previewImage.alt = `TikTok slideshow image ${currentIndex + 1} of ${images.length}`;
         setImageFallbacks(previewImage, images[currentIndex]);
         previewLabel.innerHTML = `<i class="bi bi-images" aria-hidden="true"></i> ${currentIndex + 1} / ${images.length} Photos`;
         if (currentDownload) currentDownload.onclick = () => doDownload(images[currentIndex], makeFilename('jpg', currentIndex + 1));
@@ -746,10 +747,11 @@ function hideResult() {
 
 function setLoading(on) {
     const btn = document.getElementById('fetchBtn');
+    if (!btn.dataset.idleHtml) btn.dataset.idleHtml = btn.innerHTML;
     btn.disabled = on;
     btn.innerHTML = on
         ? '<i class="bi bi-hourglass-split"></i> Fetching...'
-        : '<i class="bi bi-lightning-charge-fill"></i> Download';
+        : btn.dataset.idleHtml;
 }
 
 /* ============================================================

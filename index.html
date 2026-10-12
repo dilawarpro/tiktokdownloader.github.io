@@ -23,16 +23,17 @@
     <meta property="og:url" content="https://tiktokvideodownload.app/">
     <meta property="og:title" content="TikTok Downloader – No Watermark HD Video, MP3 &amp; Captions (Free)">
     <meta property="og:description" content="Save TikTok videos without watermark, convert to MP3, copy captions and download slideshows. Free, fast, no login.">
-    <meta property="og:image" content="https://tiktokvideodownload.app/og-image.jpg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    <meta property="og:image" content="https://tiktokvideodownload.app/assets/img/favicon.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:image:alt" content="TikTok Downloader icon">
     <meta property="og:site_name" content="TikTok Downloader">
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="TikTok Downloader – No Watermark HD Video, MP3 &amp; Captions">
     <meta name="twitter:description" content="Download TikTok videos without watermark, extract MP3, copy captions. Free, no login.">
-    <meta name="twitter:image" content="https://tiktokvideodownload.app/og-image.jpg">
+    <meta name="twitter:image" content="https://tiktokvideodownload.app/assets/img/favicon.png">
 
     <!-- AdSense tag -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5580564546196829" crossorigin="anonymous"></script>
@@ -75,7 +76,6 @@
         {
           "@type": "HowTo",
           "name": "How to download a TikTok video without watermark",
-          "totalTime": "PT15S",
           "step": [
             { "@type": "HowToStep", "name": "Copy the TikTok link", "text": "In TikTok, tap Share, then Copy Link." },
             { "@type": "HowToStep", "name": "Paste and press Download", "text": "Paste the link into the box at tiktokvideodownload.app and press Download." },
@@ -85,13 +85,13 @@
         {
           "@type": "FAQPage",
           "mainEntity": [
-            { "@type": "Question", "name": "Why can't I copy TikTok captions in the app?", "acceptedAnswer": { "@type": "Answer", "text": "TikTok doesn't provide a native copy-caption button. This tool lets you copy and download any TikTok video caption for free." } },
-            { "@type": "Question", "name": "How to copy a TikTok video caption?", "acceptedAnswer": { "@type": "Answer", "text": "Paste the TikTok URL, click Download. The caption appears automatically, click Copy Caption to copy it instantly." } },
-            { "@type": "Question", "name": "How to download TikTok videos without watermark?", "acceptedAnswer": { "@type": "Answer", "text": "Paste the TikTok URL, click Download, then click Download Video (No Watermark) to save a clean HD MP4." } },
+            { "@type": "Question", "name": "Why can't I copy TikTok captions in the app?", "acceptedAnswer": { "@type": "Answer", "text": "Some app views make caption text difficult to select. Paste a public TikTok link here; if caption data is returned, you can copy it or save it as text." } },
+            { "@type": "Question", "name": "How to copy a TikTok video caption?", "acceptedAnswer": { "@type": "Answer", "text": "Paste a public TikTok URL and select Check link. If a caption is returned, use Copy Caption or Save as .txt." } },
+            { "@type": "Question", "name": "How to download TikTok videos without watermark?", "acceptedAnswer": { "@type": "Answer", "text": "Paste a public TikTok URL and select Check link. If an eligible video source is available, choose Download Video (No Watermark). Results depend on the provider." } },
             { "@type": "Question", "name": "How to download TikTok MP3 audio?", "acceptedAnswer": { "@type": "Answer", "text": "Paste any TikTok URL and click Download. Once the content loads, click Download MP3 Audio to save the audio track." } },
             { "@type": "Question", "name": "Can I download TikTok videos on iPhone or Android?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. It works in any mobile browser, so no app is needed." } },
-            { "@type": "Question", "name": "Is TikTok Downloader free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, 100% free. No registration, no login, no limits." } },
-            { "@type": "Question", "name": "What is the Download History feature?", "acceptedAnswer": { "@type": "Answer", "text": "Every TikTok you fetch is saved to your local download history so you can reload, re-copy, or re-download it without pasting the URL again. It is stored locally on your device only." } }
+            { "@type": "Question", "name": "Is TikTok Downloader free?", "acceptedAnswer": { "@type": "Answer", "text": "No account is currently required. Processing and download options depend on the public post and third-party provider." } },
+            { "@type": "Question", "name": "What is the Download History feature?", "acceptedAnswer": { "@type": "Answer", "text": "Recent fetched items are stored in your browser so you can revisit them. Clear the list from the page; fetching media again still depends on the source and provider." } }
           ]
         }
       ]
@@ -122,7 +122,7 @@
 <!-- ANNOUNCEMENT BAR -->
 <div class="announce-bar" id="announceBar" role="banner">
     <i class="bi bi-stars" aria-hidden="true"></i>
-    <span>🎉 <strong>New:</strong> Faster downloads, smart file names, Download History and Auto Dark Mode. <a href="#downloader">Try it free</a></span>
+    <span><strong>Available in your browser:</strong> video, audio, caption export, slideshow downloads, and local history. <a href="#downloader">Open the tool</a></span>
     <button class="close-bar" onclick="closeAnnounceBar()" aria-label="Close announcement">
         <i class="bi bi-x-lg" aria-hidden="true"></i>
     </button>
@@ -205,7 +205,7 @@
                         </button>
                     </div>
                     <button class="btn-main-dl" id="fetchBtn" onclick="fetchTikTok()" aria-label="Download TikTok content">
-                        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i> Download
+                        <i class="bi bi-lightning-charge-fill" aria-hidden="true"></i> Check link
                     </button>
                 </div>
 
@@ -266,8 +266,8 @@
             </div>
             <div class="col-6 col-md-3">
                 <div class="stat-item">
-                    <span class="stat-num" data-target="24" data-suffix="/7">0</span>
-                    <span class="stat-lbl">Always Online</span>
+                    <span class="stat-num" data-target="0" data-suffix="">0</span>
+                    <span class="stat-lbl">Accounts required</span>
                 </div>
             </div>
         </div>
@@ -350,7 +350,7 @@
                         </div>
                         <p class="mt-3 mb-0" style="font-size:0.73rem;color:var(--text-muted);text-align:center;">
                             <i class="bi bi-shield-check" style="color:var(--success);" aria-hidden="true"></i>
-                            Secure download. No data stored. No tracking.
+                            History stays in this browser. TikWM and Tikmate process submitted links.
                         </p>
                     </div>
                 </div>
@@ -516,7 +516,7 @@
     <div class="container">
         <div class="text-center mb-5">
             <span class="section-label"><i class="bi bi-journal-text" aria-hidden="true"></i> Our Story</span>
-            <h2 class="section-title" id="story-h2">Why We Built the Best <span class="text-gradient">TikTok Caption Downloader</span></h2>
+            <h2 class="section-title" id="story-h2">Why We Built a <span class="text-gradient">TikTok Caption Downloader</span></h2>
             <p class="section-desc">A real story from a TikTok lover that inspired this tool.</p>
         </div>
         <div class="row g-4 align-items-start">
@@ -593,7 +593,7 @@
         <div class="text-center mb-5">
             <span class="section-label"><i class="bi bi-list-check" aria-hidden="true"></i> Simple Steps</span>
             <h2 class="section-title" id="hiw-h2">How to <span class="text-gradient">Copy TikTok Caption</span> &amp; Download Videos</h2>
-            <p class="section-desc">3 easy steps. No signup, no app, no watermark, no limits.</p>
+            <p class="section-desc">Three steps. No account or app is required; available media options depend on the post.</p>
         </div>
         <div class="row g-4 justify-content-center">
             <div class="col-md-4">
@@ -631,19 +631,19 @@
                 <h2 class="section-title text-center" id="guide-h2">Free <span class="text-gradient">TikTok Video Downloader</span> Without Watermark</h2>
 
                 <h3 class="feat-title mt-4">What is a TikTok downloader?</h3>
-                <p>A TikTok downloader saves a TikTok video to your phone or computer so you can watch it offline. This tool removes the TikTok watermark and username overlay, so you get the clean HD MP4. It also lets you convert TikTok to MP3, copy the caption, and save every photo from a slideshow post.</p>
+                <p>A TikTok downloader can save an available video source to your phone or computer for offline viewing. If a supported non-watermarked source is returned, it can be saved as an MP4; quality depends on the source. Audio, caption, and slideshow-image options may also be returned for supported public posts.</p>
 
                 <h3 class="feat-title mt-4">How to download TikTok videos on iPhone, Android and PC</h3>
                 <p>Copy the video link from TikTok (Share → Copy Link), paste it into the box at the top of this page and press Download. It runs in your browser, so there is nothing to install. On iPhone use Safari; on Android use Chrome; on a computer any modern browser works.</p>
 
                 <h3 class="feat-title mt-4">TikTok to MP3: save the sound only</h3>
-                <p>Want a trending sound or a voiceover? Paste the link and choose <strong>Download MP3 Audio</strong>. The file is named after the video so it is easy to find later.</p>
+                <p>Want the sound or a voiceover? Paste a public link and select <strong>Check link</strong>. If an audio source is returned, choose <strong>Download MP3 Audio</strong>. The filename uses the available caption when possible.</p>
 
                 <h3 class="feat-title mt-4">Copy TikTok captions and hashtags</h3>
-                <p>TikTok has no copy button for captions. Paste the link here and the full caption appears, ready to copy or save as a .txt file. Useful for research, translation and content ideas.</p>
+                <p>Paste a public link and select <strong>Check link</strong>. If caption data is returned, copy it or save it as a text file for reference, research, or translation.</p>
 
                 <h3 class="feat-title mt-4">Download TikTok slideshows and photo posts</h3>
-                <p>Photo carousels are saved image by image or all at once from the same page.</p>
+                <p>For supported photo posts, the page displays returned images and provides individual or bulk download options.</p>
                 <h3 class="feat-title mt-4">LIVE Preview TikTok Videos Before Downloading</h3>
                 <p>We have tested many TikTok video downloader tools and found that almost all tools lack a live video preview feature, making it difficult to confirm the correct video before downloading. With tiktokvideodownload.app, you can preview your selected TikTok video before downloading it to ensure you've chosen the correct one and avoid downloading the wrong content. This convenient feature helps you avoid downloading the wrong video and makes downloading TikTok videos faster, easier, and more reliable.</p>
 
@@ -678,28 +678,28 @@
                         <span>Why can't I copy TikTok captions in the app?</span>
                         <div class="faq-ico"><i class="bi bi-plus-lg" aria-hidden="true"></i></div>
                     </div>
-                    <div class="faq-a"><div>TikTok doesn't provide a native "copy caption" button. That's exactly why we built this TikTok caption downloader to let you easily copy and download any TikTok video caption for free.</div></div>
+                    <div class="faq-a"><div>Some app views make caption text difficult to select. Paste a public TikTok link here; if caption data is returned, you can copy it or save it as text.</div></div>
                 </div>
                 <div class="faq-item">
                     <div class="faq-q" onclick="toggleFaq(this)" tabindex="0" role="button" aria-expanded="false">
                         <span>How to copy a TikTok video caption?</span>
                         <div class="faq-ico"><i class="bi bi-plus-lg" aria-hidden="true"></i></div>
                     </div>
-                    <div class="faq-a"><div>Paste the TikTok URL, click Download. The caption appears automatically. Click "Copy Caption" to copy it instantly to your clipboard.</div></div>
+                    <div class="faq-a"><div>Paste a public TikTok URL and select Check link. If a caption is returned, use Copy Caption or Save as .txt.</div></div>
                 </div>
                 <div class="faq-item">
                     <div class="faq-q" onclick="toggleFaq(this)" tabindex="0" role="button" aria-expanded="false">
                         <span>How to download TikTok videos without watermark?</span>
                         <div class="faq-ico"><i class="bi bi-plus-lg" aria-hidden="true"></i></div>
                     </div>
-                    <div class="faq-a"><div>Paste the TikTok URL, click Download, then click "Download Video (No Watermark)" to save a clean HD MP4 file with no TikTok logo.</div></div>
+                    <div class="faq-a"><div>Paste a public TikTok URL and select Check link. If an eligible video source is available, choose Download Video (No Watermark). Results depend on the provider.</div></div>
                 </div>
                 <div class="faq-item">
                     <div class="faq-q" onclick="toggleFaq(this)" tabindex="0" role="button" aria-expanded="false">
                         <span>How to download TikTok MP3 audio?</span>
                         <div class="faq-ico"><i class="bi bi-plus-lg" aria-hidden="true"></i></div>
                     </div>
-                    <div class="faq-a"><div>Paste any TikTok URL and click Download. Once the content loads, click "Download MP3 Audio" to save the audio as an MP3 file. Works for all TikTok videos, sounds, and music.</div></div>
+                    <div class="faq-a"><div>Paste a public TikTok URL and select Check link. If an audio source is returned, choose Download MP3 Audio.</div></div>
                 </div>
                 <div class="faq-item">
                     <div class="faq-q" onclick="toggleFaq(this)" tabindex="0" role="button" aria-expanded="false">
@@ -713,14 +713,14 @@
                         <span>Is TikTok Downloader free?</span>
                         <div class="faq-ico"><i class="bi bi-plus-lg" aria-hidden="true"></i></div>
                     </div>
-                    <div class="faq-a"><div>Yes! 100% free. No registration, no login, no subscription, no limits. Copy captions, download videos, extract MP3, save slideshows, all free.</div></div>
+                    <div class="faq-a"><div>No account is currently required. Processing and download options depend on the public post and third-party provider.</div></div>
                 </div>
                 <div class="faq-item">
                     <div class="faq-q" onclick="toggleFaq(this)" tabindex="0" role="button" aria-expanded="false">
                         <span>What is the Download History feature?</span>
                         <div class="faq-ico"><i class="bi bi-plus-lg" aria-hidden="true"></i></div>
                     </div>
-                    <div class="faq-a"><div>Every TikTok you fetch is automatically saved to your local Download History. You can re-load any previous download, copy its caption, or re-download content without pasting the URL again. History is stored locally on your device only.</div></div>
+                    <div class="faq-a"><div>Recent fetched items are stored in your browser so you can revisit them. Clear the list from the page; fetching media again still depends on the source and provider.</div></div>
                 </div>
             </div>
         </div>
@@ -730,27 +730,18 @@
 <div class="divider"></div>
 
 <!-- Keywords -->
-<section style="padding:38px 0;background:var(--section-alt);" aria-label="Related searches">
+<section style="padding:38px 0;background:var(--section-alt);" aria-label="Related tools">
     <div class="container">
         <div class="text-center mb-3">
             <span style="font-size:0.76rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">
-                <i class="bi bi-search me-1" aria-hidden="true"></i> Related Searches
+                <i class="bi bi-link-45deg me-1" aria-hidden="true"></i> Related Tools
             </span>
         </div>
         <div class="text-center">
-            <a href="#downloader" class="kw-tag"><i class="bi bi-camera-video" aria-hidden="true"></i> TikTok Video Downloader</a>
-            <a href="#downloader" class="kw-tag"><i class="bi bi-ban" aria-hidden="true"></i> No Watermark</a>
-            <a href="#mp3" class="kw-tag"><i class="bi bi-music-note" aria-hidden="true"></i> TikTok MP3 Downloader</a>
-            <a href="#captions" class="kw-tag"><i class="bi bi-card-text" aria-hidden="true"></i> TikTok Caption Downloader</a>
-            <a href="#captions" class="kw-tag"><i class="bi bi-clipboard" aria-hidden="true"></i> TikTok Caption Copy Paste</a>
-            <a href="#captions" class="kw-tag"><i class="bi bi-file-text" aria-hidden="true"></i> TikTok Video Caption Download</a>
-            <a href="#downloader" class="kw-tag"><i class="bi bi-download" aria-hidden="true"></i> TikTok to MP4</a>
-            <a href="#mp3" class="kw-tag"><i class="bi bi-music-note-beamed" aria-hidden="true"></i> TikTok to MP3</a>
-            <a href="#downloader" class="kw-tag"><i class="bi bi-images" aria-hidden="true"></i> Slideshow Downloader</a>
-            <a href="#downloader" class="kw-tag"><i class="bi bi-phone" aria-hidden="true"></i> TikTok on Android</a>
-            <a href="#downloader" class="kw-tag"><i class="bi bi-pc-display" aria-hidden="true"></i> TikTok for PC</a>
-            <a href="#captions" class="kw-tag"><i class="bi bi-heart" aria-hidden="true"></i> TikTok Love Caption</a>
-            <a href="#downloader" class="kw-tag"><i class="bi bi-globe" aria-hidden="true"></i> Free TikTok Downloader 2026</a>
+            <a href="./tiktok-downloader.html" class="kw-tag"><i class="bi bi-camera-video" aria-hidden="true"></i> Video downloader guide</a>
+            <a href="./tiktok-mp3.html" class="kw-tag"><i class="bi bi-music-note-beamed" aria-hidden="true"></i> TikTok to MP3</a>
+            <a href="./ssstiktok.html" class="kw-tag"><i class="bi bi-link-45deg" aria-hidden="true"></i> SSS TikTok alternative</a>
+            <a href="#faq" class="kw-tag"><i class="bi bi-question-circle" aria-hidden="true"></i> Downloading questions</a>
         </div>
     </div>
 </section>
@@ -773,10 +764,6 @@
                 </p>
                 <div class="footer-social">
                     <a href="https://dilawarpro.com" target="_blank" rel="noopener" class="soc-link" aria-label="Dilawar Pro Website"><i class="bi bi-globe2" aria-hidden="true"></i></a>
-                    <a href="#" class="soc-link" aria-label="Twitter X"><i class="bi bi-twitter-x" aria-hidden="true"></i></a>
-                    <a href="#" class="soc-link" aria-label="YouTube"><i class="bi bi-youtube" aria-hidden="true"></i></a>
-                    <a href="#" class="soc-link" aria-label="Instagram"><i class="bi bi-instagram" aria-hidden="true"></i></a>
-                    <a href="#" class="soc-link" aria-label="TikTok"><i class="bi bi-tiktok" aria-hidden="true"></i></a>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-2">
@@ -813,7 +800,7 @@
         </div>
         <div class="footer-bottom">
             <p style="font-size:0.76rem;color:var(--text-muted);margin-bottom:10px;">
-                ⚠️ Not affiliated with TikTok, Douyin, or ByteDance. For personal use only.
+                This independent tool is not affiliated with TikTok, Douyin, or ByteDance. Only download content you have permission to save.
             </p>
             <a href="https://dilawarpro.com" target="_blank" rel="noopener" class="watermark-wrap" aria-label="Designed and Developed with coffee and love by Dilawar Pro for TikTok Lovers">
                 <span class="wm-coffee" aria-label="Coffee">☕</span>
@@ -863,16 +850,6 @@
 </script>
 
 <!-- Bootstrap JS + site script (deferred so they never block first paint) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 <script src="assets/js/script.js" defer></script>
-<script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js")
-          .then(registration => console.log("Service Worker registered with scope:", registration.scope))
-          .catch(error => console.error("Service Worker registration failed:", error));
-      });
-    }
-</script>
 </body>
 </html>
