@@ -207,6 +207,7 @@ img { max-width:100%; }
 @keyframes dot-rise { 0%{transform:translateY(100vh) scale(0);opacity:0;} 10%{opacity:0.5;} 90%{opacity:0.5;} 100%{transform:translateY(-50px) scale(1);opacity:0;} }
 .hero-inner { position:relative; z-index:2; }
 .hero-badge {
+    display:inline-flex; align-items:center; gap:8px; flex-direction: row; flex-wrap: wrap; align-content: stretch; justify-content: center;
     background:var(--glass); border:1px solid var(--glass-border);
     backdrop-filter:blur(10px); border-radius:50px; padding:7px 18px;
     font-size:0.78rem; font-weight:600; color:var(--text-muted);
