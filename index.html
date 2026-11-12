@@ -831,6 +831,106 @@
 <div id="toastBox" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Sets theme before first paint to avoid a flash of the wrong theme -->
+<style>
+  .ctm-overlay{--ctm-brand:#fe2c55;--ctm-brand-dark:#d91f45;--ctm-ink:#161823;--ctm-paper:#fff;--ctm-muted:#5b5f6e;--ctm-line:#ececf0;
+    position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;
+    background:rgba(10,12,20,.6);backdrop-filter:blur(3px);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  @media(prefers-color-scheme:dark){.ctm-overlay{--ctm-ink:#f4f4f7;--ctm-paper:#1d1f2b;--ctm-muted:#a9acba;--ctm-line:#2e3140}}
+  .ctm-overlay.ctm-open{display:flex}
+  .ctm-overlay *{box-sizing:border-box}
+  .ctm-modal{position:relative;width:100%;max-width:420px;padding:34px 26px 22px;text-align:center;
+    background:var(--ctm-paper);color:var(--ctm-ink);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.4);animation:ctm-pop .22s ease-out}
+  @keyframes ctm-pop{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.ctm-modal{animation:none}}
+  .ctm-close{position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;border-radius:50%;background:none;
+    color:var(--ctm-muted);font-size:24px;line-height:1;cursor:pointer}
+  .ctm-close:hover{background:rgba(127,127,127,.15)}
+  .ctm-icon{width:56px;height:56px;margin:0 auto 16px;display:grid;place-items:center;border-radius:16px;
+    background:var(--ctm-brand);color:#fff}
+  .ctm-title{margin:0 0 8px;font-size:22px;line-height:1.25;font-weight:700}
+  .ctm-text{margin:0 0 18px;font-size:15px;line-height:1.5;color:var(--ctm-muted)}
+  .ctm-list{list-style:none;margin:0 0 22px;padding:14px 0;border-top:1px solid var(--ctm-line);border-bottom:1px solid var(--ctm-line);
+    display:grid;gap:8px;text-align:left;font-size:14px}
+  .ctm-list li{display:flex;gap:10px;align-items:center}
+  .ctm-list li::before{content:"";flex:none;width:18px;height:18px;border-radius:50%;background:var(--ctm-brand)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/12px no-repeat}
+  .ctm-btn{display:block;width:100%;padding:13px 16px;border:0;border-radius:10px;font:600 16px/1.2 inherit;text-align:center;text-decoration:none;cursor:pointer}
+  .ctm-primary{background:var(--ctm-brand);color:#fff}
+  .ctm-primary:hover{background:var(--ctm-brand-dark)}
+  .ctm-cancel{margin-top:6px;background:none;color:var(--ctm-muted);font-weight:500}
+  .ctm-cancel:hover{color:var(--ctm-ink)}
+  .ctm-btn:focus-visible,.ctm-close:focus-visible{outline:3px solid var(--ctm-brand);outline-offset:2px}
+</style>
+
+<div class="ctm-overlay" id="ctmOverlay" role="dialog" aria-modal="true" aria-labelledby="ctmTitle" aria-describedby="ctmText">
+  <div class="ctm-modal">
+    <button class="ctm-close" id="ctmClose" aria-label="Close">&times;</button>
+    <div class="ctm-icon" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+    </div>
+    <h2 class="ctm-title" id="ctmTitle">Try our most advanced TikTok Downloader</h2>
+    <p class="ctm-text" id="ctmText">Save TikTok videos in seconds with a faster, cleaner tool.</p>
+    <ul class="ctm-list">
+      <li>Download without watermark</li>
+      <li>HD quality, MP4 and MP3</li>
+      <li>Works on Android, iPhone and desktop</li>
+    </ul>
+    <a class="ctm-btn ctm-primary" id="ctmGo" href="https://cliptoid.com" target="_blank" rel="noopener">Visit now</a>
+    <button class="ctm-btn ctm-cancel" id="ctmCancel" type="button">Cancel</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var DELAY_MS = 1500;          // time before the modal appears
+  var HIDE_HOURS = 24;          // how long to stay hidden after Cancel/Visit (0 = show every load)
+  var KEY = 'ctmDismissedAt';
+
+  var overlay = document.getElementById('ctmOverlay');
+  var cancelBtn = document.getElementById('ctmCancel');
+  var lastFocus = null;
+
+  function recentlyDismissed() {
+    try {
+      var t = parseInt(localStorage.getItem(KEY), 10);
+      return t && Date.now() - t < HIDE_HOURS * 3600000;
+    } catch (e) { return false; }
+  }
+  function remember() { try { localStorage.setItem(KEY, Date.now()); } catch (e) {} }
+
+  function open() {
+    if (HIDE_HOURS && recentlyDismissed()) return;
+    lastFocus = document.activeElement;
+    overlay.classList.add('ctm-open');
+    document.body.style.overflow = 'hidden';
+    cancelBtn.focus();
+  }
+  function close() {
+    overlay.classList.remove('ctm-open');
+    document.body.style.overflow = '';
+    remember();
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  cancelBtn.addEventListener('click', close);
+  document.getElementById('ctmClose').addEventListener('click', close);
+  document.getElementById('ctmGo').addEventListener('click', remember);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (!overlay.classList.contains('ctm-open')) return;
+    if (e.key === 'Escape') return close();
+    if (e.key !== 'Tab') return;
+    var f = overlay.querySelectorAll('button, a[href]');
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  setTimeout(open, DELAY_MS);
+})();
+</script>
+    
 <script>
 (function(){
   try{
