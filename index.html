@@ -833,8 +833,8 @@
 <!-- Sets theme before first paint to avoid a flash of the wrong theme -->
 <style>
   .ctm-overlay{--ctm-brand:#fe2c55;--ctm-brand-dark:#d91f45;--ctm-cyan:#25f4ee;--ctm-ink:#161823;--ctm-paper:#fff;--ctm-muted:#5b5f6e;--ctm-line:#ececf0;--ctm-chip:#f4f4f7;
-    position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;
-    padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));
+    position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;
+    padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));
     background:rgba(10,12,20,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s}
@@ -842,18 +842,28 @@
   .ctm-overlay.ctm-open{opacity:1;visibility:visible}
   .ctm-overlay *{box-sizing:border-box}
 
-  .ctm-modal{position:relative;width:100%;max-width:420px;padding:36px 26px 20px;text-align:center;overflow:hidden;
-    background:var(--ctm-paper);color:var(--ctm-ink);border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.45);
+  /* Modal never taller than the visible screen; content scrolls inside */
+  .ctm-modal{position:relative;display:flex;flex-direction:column;width:100%;max-width:430px;padding:0;text-align:center;overflow:hidden;
+    max-height:calc(100vh - 32px);
+    max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    background:var(--ctm-paper);color:var(--ctm-ink);border-radius:22px;box-shadow:0 28px 80px rgba(0,0,0,.45);
     transform:translateY(14px) scale(.96);transition:transform .3s cubic-bezier(.2,.9,.3,1.2)}
   .ctm-open .ctm-modal{transform:none}
-  .ctm-modal::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;
+  .ctm-modal::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;z-index:3;
     background:linear-gradient(90deg,var(--ctm-cyan),var(--ctm-brand))}
 
-  .ctm-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border:0;border-radius:50%;background:none;
-    color:var(--ctm-muted);font-size:24px;line-height:1;cursor:pointer;transition:background .15s,color .15s}
-  .ctm-close:hover{background:rgba(127,127,127,.15);color:var(--ctm-ink)}
+  .ctm-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+    padding:48px 24px 22px}
 
-  .ctm-icon{width:60px;height:60px;margin:0 auto 16px;display:grid;place-items:center;border-radius:18px;
+  .ctm-grab{display:none}
+
+  /* Close button: fixed in the corner, with its own background so it is always visible */
+  .ctm-close{position:absolute;top:14px;right:14px;z-index:4;width:36px;height:36px;border:0;border-radius:50%;
+    background:var(--ctm-chip);color:var(--ctm-muted);font-size:22px;line-height:1;cursor:pointer;
+    display:grid;place-items:center;padding:0;transition:background .15s,color .15s}
+  .ctm-close:hover{background:rgba(127,127,127,.25);color:var(--ctm-ink)}
+
+  .ctm-icon{width:60px;height:60px;margin:0 auto 14px;display:grid;place-items:center;border-radius:18px;
     background:var(--ctm-brand);color:#fff;box-shadow:-3px -3px 0 var(--ctm-cyan),3px 3px 0 rgba(254,44,85,.35)}
   .ctm-icon svg{animation:ctm-bob 1.8s ease-in-out infinite}
   @keyframes ctm-bob{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
@@ -861,7 +871,10 @@
   .ctm-badge{display:inline-block;margin-bottom:10px;padding:4px 10px;border-radius:999px;
     background:rgba(254,44,85,.1);color:var(--ctm-brand);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
   .ctm-title{margin:0 0 8px;font-size:22px;line-height:1.25;font-weight:800}
-  .ctm-text{margin:0 0 18px;font-size:15px;line-height:1.5;color:var(--ctm-muted)}
+  .ctm-text{margin:0 0 16px;font-size:15px;line-height:1.5;color:var(--ctm-muted)}
+
+  .ctm-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:0 0 16px;padding:0;list-style:none}
+  .ctm-chips li{padding:5px 11px;border-radius:999px;background:var(--ctm-chip);font-size:12.5px;font-weight:600}
 
   .ctm-list{list-style:none;margin:0 0 20px;padding:14px 0;border-top:1px solid var(--ctm-line);border-bottom:1px solid var(--ctm-line);
     display:grid;gap:9px;text-align:left;font-size:14.5px}
@@ -869,9 +882,12 @@
   .ctm-list li::before{content:"";flex:none;width:18px;height:18px;border-radius:50%;background:var(--ctm-brand)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/12px no-repeat}
 
-  .ctm-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 16px;border:0;border-radius:12px;
+  .ctm-btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 16px;border:0;border-radius:12px;
     font:700 16px/1.2 inherit;text-align:center;text-decoration:none;cursor:pointer;transition:background .15s,transform .15s,box-shadow .15s}
   .ctm-primary{background:var(--ctm-brand);color:#fff;box-shadow:0 8px 20px rgba(254,44,85,.35)}
+  .ctm-primary::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:ctm-shine 3.2s ease-in-out 1s infinite}
+  @keyframes ctm-shine{0%{left:-60%}35%,100%{left:130%}}
   .ctm-primary:hover{background:var(--ctm-brand-dark);transform:translateY(-1px)}
   .ctm-primary:active{transform:translateY(0)}
   .ctm-primary svg{transition:transform .15s}
@@ -881,97 +897,193 @@
   .ctm-foot{margin:12px 0 0;font-size:12px;color:var(--ctm-muted)}
   .ctm-btn:focus-visible,.ctm-close:focus-visible{outline:3px solid var(--ctm-brand);outline-offset:2px}
 
-  /* Mobile: slides up from the bottom like a sheet */
+  /* Mobile: bottom sheet. Keeps a clear gap at the top so it never touches the browser bar or navbar */
   @media(max-width:520px){
     .ctm-overlay{align-items:flex-end;padding:0}
-    .ctm-modal{max-width:none;border-radius:22px 22px 0 0;padding-bottom:max(20px,env(safe-area-inset-bottom));transform:translateY(100%)}
+    .ctm-modal{max-width:none;border-radius:24px 24px 0 0;
+      max-height:calc(100vh - 72px);
+      max-height:calc(100dvh - 72px - env(safe-area-inset-top));
+      transform:translateY(100%)}
     .ctm-open .ctm-modal{transform:none}
+    .ctm-body{padding:44px 20px max(22px,env(safe-area-inset-bottom))}
+    .ctm-grab{display:block;position:absolute;top:0;left:0;right:0;height:34px;z-index:2;touch-action:none}
+    .ctm-grab::after{content:"";position:absolute;top:12px;left:50%;width:42px;height:5px;margin-left:-21px;border-radius:3px;background:var(--ctm-line)}
+    .ctm-close{top:12px;right:12px}
+  }
+
+  /* Short screens (small phones, landscape): tighter spacing, hide the extras */
+  @media(max-height:700px){
+    .ctm-body{padding-top:42px}
+    .ctm-icon{width:48px;height:48px;margin-bottom:10px;border-radius:14px}
+    .ctm-icon svg{width:22px;height:22px}
+    .ctm-title{font-size:20px}
+    .ctm-text{margin-bottom:12px}
+    .ctm-chips{display:none}
+    .ctm-list{margin-bottom:14px;padding:10px 0;gap:7px}
+    .ctm-btn{padding:12px 16px}
+  }
+  @media(max-height:540px){
+    .ctm-list,.ctm-foot{display:none}
+    .ctm-text{margin-bottom:14px}
   }
   @media(prefers-reduced-motion:reduce){
     .ctm-overlay,.ctm-modal,.ctm-btn,.ctm-primary svg{transition:none}
-    .ctm-icon svg{animation:none}
+    .ctm-icon svg,.ctm-primary::after{animation:none}
   }
 </style>
 
+<link rel="dns-prefetch" href="//cliptoid.com">
+
 <div class="ctm-overlay" id="ctmOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="ctmTitle" aria-describedby="ctmText">
-  <div class="ctm-modal">
+  <div class="ctm-modal" id="ctmModal">
+    <div class="ctm-grab" id="ctmGrab" aria-hidden="true"></div>
     <button class="ctm-close" id="ctmClose" type="button" aria-label="Close">&times;</button>
-    <div class="ctm-icon" aria-hidden="true">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+    <div class="ctm-body">
+      <div class="ctm-icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+      </div>
+      <span class="ctm-badge" id="ctmBadge">Free tool</span>
+      <h2 class="ctm-title" id="ctmTitle">Try our most advanced TikTok Downloader</h2>
+      <p class="ctm-text" id="ctmText">Save TikTok videos in seconds with a faster, cleaner tool.</p>
+      <ul class="ctm-chips" aria-label="Highlights">
+        <li>⚡ Fast</li>
+        <li>🚫 No watermark</li>
+        <li>🆓 Free</li>
+      </ul>
+      <ul class="ctm-list">
+        <li>Download without watermark</li>
+        <li>HD quality, MP4 and MP3</li>
+        <li>Works on Android, iPhone and desktop</li>
+      </ul>
+      <a class="ctm-btn ctm-primary" id="ctmGo" href="https://cliptoid.com" target="_blank" rel="noopener">
+        <span id="ctmCta">Visit cliptoid.com</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <button class="ctm-btn ctm-cancel" id="ctmCancel" type="button">Maybe later</button>
+      <p class="ctm-foot">100% free. No signup needed.</p>
     </div>
-    <span class="ctm-badge">Free tool</span>
-    <h2 class="ctm-title" id="ctmTitle">Try our most advanced TikTok Downloader</h2>
-    <p class="ctm-text" id="ctmText">Save TikTok videos in seconds with a faster, cleaner tool.</p>
-    <ul class="ctm-list">
-      <li>Download without watermark</li>
-      <li>HD quality, MP4 and MP3</li>
-      <li>Works on Android, iPhone and desktop</li>
-    </ul>
-    <a class="ctm-btn ctm-primary" id="ctmGo" href="https://cliptoid.com" target="_blank" rel="noopener">
-      Visit cliptoid.com
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </a>
-    <button class="ctm-btn ctm-cancel" id="ctmCancel" type="button">Maybe later</button>
-    <p class="ctm-foot">100% free. No signup needed.</p>
   </div>
 </div>
 
 <script>
 (function () {
-  /* ====== SETTINGS ====== */
-  var DELAY_MS = 1500;          // wait before the modal appears
-  var EXIT_INTENT = false;      // true = also open when a desktop visitor moves the mouse out of the top of the page
-  var TRACK_LINK = true;        // adds UTM parameters so you can see popup clicks in Google Analytics
-  /* ====================== */
+  /* ================= SETTINGS ================= */
+  var DELAY_MS        = 1500;   // wait before the modal appears
+  var SCROLL_PERCENT  = 0;      // 0 = off. e.g. 30 = also open once the visitor scrolls 30% down
+  var EXIT_INTENT     = false;  // true = also open when a desktop visitor moves the mouse out of the top of the page
+  var MAX_PER_SESSION = 0;      // 0 = show on EVERY page load. 1 = once per browser session, 3 = three times, etc.
+  var TRACK_LINK      = true;   // adds UTM parameters to the button link
+  var TRACK_EVENTS    = true;   // sends popup_view / popup_click / popup_dismiss to Google Analytics (gtag or dataLayer)
+  var HIDE_FOR_BOTS   = true;   // don't show the popup to crawlers and audit tools
 
-  // Don't show the promo on cliptoid.com itself
+  // Copy variants: one is picked at random on each load. Keep one entry only to disable A/B testing.
+  var VARIANTS = [
+    { badge: 'Free tool',    title: 'Try our most advanced TikTok Downloader', text: 'Save TikTok videos in seconds with a faster, cleaner tool.', cta: 'Visit cliptoid.com' },
+    { badge: 'No watermark', title: 'Download TikTok videos without watermark', text: 'Paste a link, get the clean HD video. It takes about 3 seconds.', cta: 'Download now' },
+    { badge: 'New',          title: 'A faster way to save TikToks',            text: 'MP4, MP3 and HD quality on any phone or computer.',           cta: 'Try it free' }
+  ];
+  /* ============================================ */
+
+  // Skip on cliptoid.com itself, and for bots
   if (/(^|\.)cliptoid\.com$/i.test(location.hostname)) return;
+  if (HIDE_FOR_BOTS && (navigator.webdriver || /bot|crawl|spider|slurp|lighthouse|pagespeed|headless/i.test(navigator.userAgent))) return;
 
-  var overlay = document.getElementById('ctmOverlay');
-  var cancelBtn = document.getElementById('ctmCancel');
-  var closeBtn = document.getElementById('ctmClose');
-  var goBtn = document.getElementById('ctmGo');
-  var lastFocus = null;
-  var shown = false;
-  var timer = null;
+  // Session limit (only used when MAX_PER_SESSION > 0)
+  var SKEY = 'ctmShownCount';
+  if (MAX_PER_SESSION > 0) {
+    try {
+      var n = parseInt(sessionStorage.getItem(SKEY), 10) || 0;
+      if (n >= MAX_PER_SESSION) return;
+    } catch (e) {}
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var overlay = $('ctmOverlay'), modal = $('ctmModal'), grab = $('ctmGrab');
+  var cancelBtn = $('ctmCancel'), closeBtn = $('ctmClose'), goBtn = $('ctmGo');
+  var lastFocus = null, shown = false, timer = null, inerted = [];
+
+  // Move the popup to the end of <body> so no parent (navbar, wrapper, transform) can clip or cover it
+  if (overlay.parentNode !== document.body) document.body.appendChild(overlay);
+
+  // Pick a copy variant
+  var vi = Math.floor(Math.random() * VARIANTS.length);
+  var v = VARIANTS[vi];
+  $('ctmBadge').textContent = v.badge;
+  $('ctmTitle').textContent = v.title;
+  $('ctmText').textContent = v.text;
+  $('ctmCta').textContent = v.cta;
 
   if (TRACK_LINK) {
-    var src = encodeURIComponent(location.hostname || 'site');
-    goBtn.href = 'https://cliptoid.com/?utm_source=' + src + '&utm_medium=popup&utm_campaign=downloader_promo';
+    goBtn.href = 'https://cliptoid.com/?utm_source=' + encodeURIComponent(location.hostname || 'site') +
+                 '&utm_medium=popup&utm_campaign=downloader_promo&utm_content=variant_' + (vi + 1);
+  }
+
+  function track(name) {
+    if (!TRACK_EVENTS) return;
+    try {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', name, { event_category: 'cliptoid_popup', event_label: 'variant_' + (vi + 1) });
+      } else if (window.dataLayer && window.dataLayer.push) {
+        window.dataLayer.push({ event: name, popup_variant: 'variant_' + (vi + 1) });
+      }
+    } catch (e) {}
   }
 
   function isOpen() { return overlay.classList.contains('ctm-open'); }
 
+  // Make the rest of the page unreachable for screen readers and keyboard while the modal is open
+  function inertPage(on) {
+    if (on) {
+      inerted = [];
+      Array.prototype.forEach.call(document.body.children, function (el) {
+        if (el === overlay || el.contains(overlay) || /^(SCRIPT|STYLE|LINK|NOSCRIPT)$/.test(el.tagName)) return;
+        if (!el.inert) { el.inert = true; inerted.push(el); }
+      });
+    } else {
+      inerted.forEach(function (el) { el.inert = false; });
+      inerted = [];
+    }
+  }
+
   function open() {
-    if (shown) return;            // once per page load
+    if (shown) return;
     shown = true;
     clearTimeout(timer);
+    removeTriggers();
     lastFocus = document.activeElement;
 
-    // Lock scroll without the page jumping sideways
+    if (MAX_PER_SESSION > 0) {
+      try { sessionStorage.setItem(SKEY, (parseInt(sessionStorage.getItem(SKEY), 10) || 0) + 1); } catch (e) {}
+    }
+
     var sbw = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = 'hidden';
     if (sbw > 0) document.body.style.paddingRight = sbw + 'px';
 
+    inertPage(true);
     overlay.setAttribute('aria-hidden', 'false');
     overlay.classList.add('ctm-open');
     cancelBtn.focus({ preventScroll: true });
+    track('popup_view');
   }
 
-  function close() {
+  function close(reason) {
+    if (!isOpen()) return;
     overlay.classList.remove('ctm-open');
     overlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
+    inertPage(false);
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+    if (reason !== 'click') track('popup_dismiss');
   }
 
-  cancelBtn.addEventListener('click', close);
-  closeBtn.addEventListener('click', close);
-  goBtn.addEventListener('click', function () { setTimeout(close, 150); });
+  cancelBtn.addEventListener('click', function () { close(); });
+  closeBtn.addEventListener('click', function () { close(); });
+  goBtn.addEventListener('click', function () { track('popup_click'); setTimeout(function () { close('click'); }, 150); });
   overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
-  // Escape to close + keep keyboard focus inside the modal
+  // Keyboard: Escape closes, Tab stays inside the modal
   document.addEventListener('keydown', function (e) {
     if (!isOpen()) return;
     if (e.key === 'Escape') { e.preventDefault(); return close(); }
@@ -982,15 +1094,41 @@
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
 
-  // Timer trigger
-  timer = setTimeout(open, DELAY_MS);
-
-  // Optional exit-intent trigger (desktop only)
-  if (EXIT_INTENT) {
-    document.addEventListener('mouseout', function (e) {
-      if (!e.relatedTarget && e.clientY <= 0) open();
-    });
+  // Mobile: drag the handle down to dismiss
+  var startY = null, dy = 0;
+  grab.addEventListener('touchstart', function (e) {
+    startY = e.touches[0].clientY; dy = 0; modal.style.transition = 'none';
+  }, { passive: true });
+  grab.addEventListener('touchmove', function (e) {
+    if (startY === null) return;
+    dy = Math.max(0, e.touches[0].clientY - startY);
+    modal.style.transform = 'translateY(' + dy + 'px)';
+  }, { passive: true });
+  function endDrag() {
+    if (startY === null) return;
+    modal.style.transition = '';
+    modal.style.transform = '';
+    var dismiss = dy > 90;
+    startY = null; dy = 0;
+    if (dismiss) close();
   }
+  grab.addEventListener('touchend', endDrag);
+  grab.addEventListener('touchcancel', endDrag);
+
+  // Triggers
+  function onScroll() {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    if (h > 0 && (window.scrollY / h) * 100 >= SCROLL_PERCENT) open();
+  }
+  function onMouseOut(e) { if (!e.relatedTarget && e.clientY <= 0) open(); }
+  function removeTriggers() {
+    window.removeEventListener('scroll', onScroll);
+    document.removeEventListener('mouseout', onMouseOut);
+  }
+
+  timer = setTimeout(open, DELAY_MS);
+  if (SCROLL_PERCENT > 0) window.addEventListener('scroll', onScroll, { passive: true });
+  if (EXIT_INTENT) document.addEventListener('mouseout', onMouseOut);
 })();
 </script>    
 <script>
