@@ -882,24 +882,13 @@
 
 <script>
 (function () {
-  var DELAY_MS = 1500;          // time before the modal appears
-  var HIDE_HOURS = 24;          // how long to stay hidden after Cancel/Visit (0 = show every load)
-  var KEY = 'ctmDismissedAt';
+  var DELAY_MS = 1500;          // time before the modal appears (shows on every page load)
 
   var overlay = document.getElementById('ctmOverlay');
   var cancelBtn = document.getElementById('ctmCancel');
   var lastFocus = null;
 
-  function recentlyDismissed() {
-    try {
-      var t = parseInt(localStorage.getItem(KEY), 10);
-      return t && Date.now() - t < HIDE_HOURS * 3600000;
-    } catch (e) { return false; }
-  }
-  function remember() { try { localStorage.setItem(KEY, Date.now()); } catch (e) {} }
-
   function open() {
-    if (HIDE_HOURS && recentlyDismissed()) return;
     lastFocus = document.activeElement;
     overlay.classList.add('ctm-open');
     document.body.style.overflow = 'hidden';
@@ -908,13 +897,11 @@
   function close() {
     overlay.classList.remove('ctm-open');
     document.body.style.overflow = '';
-    remember();
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
   cancelBtn.addEventListener('click', close);
   document.getElementById('ctmClose').addEventListener('click', close);
-  document.getElementById('ctmGo').addEventListener('click', remember);
   overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
   document.addEventListener('keydown', function (e) {
@@ -929,8 +916,7 @@
 
   setTimeout(open, DELAY_MS);
 })();
-</script>
-    
+</script>    
 <script>
 (function(){
   try{
