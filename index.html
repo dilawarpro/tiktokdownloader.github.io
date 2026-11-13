@@ -832,42 +832,74 @@
 
 <!-- Sets theme before first paint to avoid a flash of the wrong theme -->
 <style>
-  .ctm-overlay{--ctm-brand:#fe2c55;--ctm-brand-dark:#d91f45;--ctm-ink:#161823;--ctm-paper:#fff;--ctm-muted:#5b5f6e;--ctm-line:#ececf0;
-    position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;
-    background:rgba(10,12,20,.6);backdrop-filter:blur(3px);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-  @media(prefers-color-scheme:dark){.ctm-overlay{--ctm-ink:#f4f4f7;--ctm-paper:#1d1f2b;--ctm-muted:#a9acba;--ctm-line:#2e3140}}
-  .ctm-overlay.ctm-open{display:flex}
+  .ctm-overlay{--ctm-brand:#fe2c55;--ctm-brand-dark:#d91f45;--ctm-cyan:#25f4ee;--ctm-ink:#161823;--ctm-paper:#fff;--ctm-muted:#5b5f6e;--ctm-line:#ececf0;--ctm-chip:#f4f4f7;
+    position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;
+    padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));
+    background:rgba(10,12,20,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s}
+  @media(prefers-color-scheme:dark){.ctm-overlay{--ctm-ink:#f4f4f7;--ctm-paper:#1d1f2b;--ctm-muted:#a9acba;--ctm-line:#2e3140;--ctm-chip:#2a2d3c}}
+  .ctm-overlay.ctm-open{opacity:1;visibility:visible}
   .ctm-overlay *{box-sizing:border-box}
-  .ctm-modal{position:relative;width:100%;max-width:420px;padding:34px 26px 22px;text-align:center;
-    background:var(--ctm-paper);color:var(--ctm-ink);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.4);animation:ctm-pop .22s ease-out}
-  @keyframes ctm-pop{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
-  @media(prefers-reduced-motion:reduce){.ctm-modal{animation:none}}
-  .ctm-close{position:absolute;top:10px;right:10px;width:36px;height:36px;border:0;border-radius:50%;background:none;
-    color:var(--ctm-muted);font-size:24px;line-height:1;cursor:pointer}
-  .ctm-close:hover{background:rgba(127,127,127,.15)}
-  .ctm-icon{width:56px;height:56px;margin:0 auto 16px;display:grid;place-items:center;border-radius:16px;
-    background:var(--ctm-brand);color:#fff}
-  .ctm-title{margin:0 0 8px;font-size:22px;line-height:1.25;font-weight:700}
+
+  .ctm-modal{position:relative;width:100%;max-width:420px;padding:36px 26px 20px;text-align:center;overflow:hidden;
+    background:var(--ctm-paper);color:var(--ctm-ink);border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.45);
+    transform:translateY(14px) scale(.96);transition:transform .3s cubic-bezier(.2,.9,.3,1.2)}
+  .ctm-open .ctm-modal{transform:none}
+  .ctm-modal::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;
+    background:linear-gradient(90deg,var(--ctm-cyan),var(--ctm-brand))}
+
+  .ctm-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border:0;border-radius:50%;background:none;
+    color:var(--ctm-muted);font-size:24px;line-height:1;cursor:pointer;transition:background .15s,color .15s}
+  .ctm-close:hover{background:rgba(127,127,127,.15);color:var(--ctm-ink)}
+
+  .ctm-icon{width:60px;height:60px;margin:0 auto 16px;display:grid;place-items:center;border-radius:18px;
+    background:var(--ctm-brand);color:#fff;box-shadow:-3px -3px 0 var(--ctm-cyan),3px 3px 0 rgba(254,44,85,.35)}
+  .ctm-icon svg{animation:ctm-bob 1.8s ease-in-out infinite}
+  @keyframes ctm-bob{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
+
+  .ctm-badge{display:inline-block;margin-bottom:10px;padding:4px 10px;border-radius:999px;
+    background:rgba(254,44,85,.1);color:var(--ctm-brand);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .ctm-title{margin:0 0 8px;font-size:22px;line-height:1.25;font-weight:800}
   .ctm-text{margin:0 0 18px;font-size:15px;line-height:1.5;color:var(--ctm-muted)}
-  .ctm-list{list-style:none;margin:0 0 22px;padding:14px 0;border-top:1px solid var(--ctm-line);border-bottom:1px solid var(--ctm-line);
-    display:grid;gap:8px;text-align:left;font-size:14px}
+
+  .ctm-list{list-style:none;margin:0 0 20px;padding:14px 0;border-top:1px solid var(--ctm-line);border-bottom:1px solid var(--ctm-line);
+    display:grid;gap:9px;text-align:left;font-size:14.5px}
   .ctm-list li{display:flex;gap:10px;align-items:center}
   .ctm-list li::before{content:"";flex:none;width:18px;height:18px;border-radius:50%;background:var(--ctm-brand)
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/12px no-repeat}
-  .ctm-btn{display:block;width:100%;padding:13px 16px;border:0;border-radius:10px;font:600 16px/1.2 inherit;text-align:center;text-decoration:none;cursor:pointer}
-  .ctm-primary{background:var(--ctm-brand);color:#fff}
-  .ctm-primary:hover{background:var(--ctm-brand-dark)}
-  .ctm-cancel{margin-top:6px;background:none;color:var(--ctm-muted);font-weight:500}
+
+  .ctm-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 16px;border:0;border-radius:12px;
+    font:700 16px/1.2 inherit;text-align:center;text-decoration:none;cursor:pointer;transition:background .15s,transform .15s,box-shadow .15s}
+  .ctm-primary{background:var(--ctm-brand);color:#fff;box-shadow:0 8px 20px rgba(254,44,85,.35)}
+  .ctm-primary:hover{background:var(--ctm-brand-dark);transform:translateY(-1px)}
+  .ctm-primary:active{transform:translateY(0)}
+  .ctm-primary svg{transition:transform .15s}
+  .ctm-primary:hover svg{transform:translateX(3px)}
+  .ctm-cancel{margin-top:6px;background:none;color:var(--ctm-muted);font-weight:500;font-size:15px}
   .ctm-cancel:hover{color:var(--ctm-ink)}
+  .ctm-foot{margin:12px 0 0;font-size:12px;color:var(--ctm-muted)}
   .ctm-btn:focus-visible,.ctm-close:focus-visible{outline:3px solid var(--ctm-brand);outline-offset:2px}
+
+  /* Mobile: slides up from the bottom like a sheet */
+  @media(max-width:520px){
+    .ctm-overlay{align-items:flex-end;padding:0}
+    .ctm-modal{max-width:none;border-radius:22px 22px 0 0;padding-bottom:max(20px,env(safe-area-inset-bottom));transform:translateY(100%)}
+    .ctm-open .ctm-modal{transform:none}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .ctm-overlay,.ctm-modal,.ctm-btn,.ctm-primary svg{transition:none}
+    .ctm-icon svg{animation:none}
+  }
 </style>
 
-<div class="ctm-overlay" id="ctmOverlay" role="dialog" aria-modal="true" aria-labelledby="ctmTitle" aria-describedby="ctmText">
+<div class="ctm-overlay" id="ctmOverlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="ctmTitle" aria-describedby="ctmText">
   <div class="ctm-modal">
-    <button class="ctm-close" id="ctmClose" aria-label="Close">&times;</button>
+    <button class="ctm-close" id="ctmClose" type="button" aria-label="Close">&times;</button>
     <div class="ctm-icon" aria-hidden="true">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
     </div>
+    <span class="ctm-badge">Free tool</span>
     <h2 class="ctm-title" id="ctmTitle">Try our most advanced TikTok Downloader</h2>
     <p class="ctm-text" id="ctmText">Save TikTok videos in seconds with a faster, cleaner tool.</p>
     <ul class="ctm-list">
@@ -875,38 +907,74 @@
       <li>HD quality, MP4 and MP3</li>
       <li>Works on Android, iPhone and desktop</li>
     </ul>
-    <a class="ctm-btn ctm-primary" id="ctmGo" href="https://cliptoid.com" target="_blank" rel="noopener">Visit cliptoid.com</a>
-    <button class="ctm-btn ctm-cancel" id="ctmCancel" type="button">Cancel</button>
+    <a class="ctm-btn ctm-primary" id="ctmGo" href="https://cliptoid.com" target="_blank" rel="noopener">
+      Visit cliptoid.com
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+    <button class="ctm-btn ctm-cancel" id="ctmCancel" type="button">Maybe later</button>
+    <p class="ctm-foot">100% free. No signup needed.</p>
   </div>
 </div>
 
 <script>
 (function () {
-  var DELAY_MS = 1500;          // time before the modal appears (shows on every page load)
+  /* ====== SETTINGS ====== */
+  var DELAY_MS = 1500;          // wait before the modal appears
+  var EXIT_INTENT = false;      // true = also open when a desktop visitor moves the mouse out of the top of the page
+  var TRACK_LINK = true;        // adds UTM parameters so you can see popup clicks in Google Analytics
+  /* ====================== */
+
+  // Don't show the promo on cliptoid.com itself
+  if (/(^|\.)cliptoid\.com$/i.test(location.hostname)) return;
 
   var overlay = document.getElementById('ctmOverlay');
   var cancelBtn = document.getElementById('ctmCancel');
+  var closeBtn = document.getElementById('ctmClose');
+  var goBtn = document.getElementById('ctmGo');
   var lastFocus = null;
+  var shown = false;
+  var timer = null;
+
+  if (TRACK_LINK) {
+    var src = encodeURIComponent(location.hostname || 'site');
+    goBtn.href = 'https://cliptoid.com/?utm_source=' + src + '&utm_medium=popup&utm_campaign=downloader_promo';
+  }
+
+  function isOpen() { return overlay.classList.contains('ctm-open'); }
 
   function open() {
+    if (shown) return;            // once per page load
+    shown = true;
+    clearTimeout(timer);
     lastFocus = document.activeElement;
-    overlay.classList.add('ctm-open');
+
+    // Lock scroll without the page jumping sideways
+    var sbw = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = 'hidden';
-    cancelBtn.focus();
+    if (sbw > 0) document.body.style.paddingRight = sbw + 'px';
+
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.classList.add('ctm-open');
+    cancelBtn.focus({ preventScroll: true });
   }
+
   function close() {
     overlay.classList.remove('ctm-open');
+    overlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
-    if (lastFocus && lastFocus.focus) lastFocus.focus();
+    document.body.style.paddingRight = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
   }
 
   cancelBtn.addEventListener('click', close);
-  document.getElementById('ctmClose').addEventListener('click', close);
+  closeBtn.addEventListener('click', close);
+  goBtn.addEventListener('click', function () { setTimeout(close, 150); });
   overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
 
+  // Escape to close + keep keyboard focus inside the modal
   document.addEventListener('keydown', function (e) {
-    if (!overlay.classList.contains('ctm-open')) return;
-    if (e.key === 'Escape') return close();
+    if (!isOpen()) return;
+    if (e.key === 'Escape') { e.preventDefault(); return close(); }
     if (e.key !== 'Tab') return;
     var f = overlay.querySelectorAll('button, a[href]');
     var first = f[0], last = f[f.length - 1];
@@ -914,7 +982,15 @@
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   });
 
-  setTimeout(open, DELAY_MS);
+  // Timer trigger
+  timer = setTimeout(open, DELAY_MS);
+
+  // Optional exit-intent trigger (desktop only)
+  if (EXIT_INTENT) {
+    document.addEventListener('mouseout', function (e) {
+      if (!e.relatedTarget && e.clientY <= 0) open();
+    });
+  }
 })();
 </script>    
 <script>
